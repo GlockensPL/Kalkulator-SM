@@ -15,9 +15,9 @@ def znajdz_koszt(czesc, decision_type, level):
         return None
 
     for lvl, price in sorted(koszt[czesc][decision_type].items(), reverse=True):
-        print(f"Sprawdzam: poziom {lvl}, cena {price}")
+        # Sprawdzamy, czy level należy do przedziału
         if level >= lvl:
-            print(f"Znaleziono koszt: {price}")
+            print(f"Znaleziono koszt: {price} dla poziomu {level} (przedział {lvl}-{lvl+9})")
             return price
     
     print("Nie znaleziono kosztu.")
