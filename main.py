@@ -23,8 +23,8 @@ def oblicz_koszt(czesc, decision, level, fabryka_lvl, ilosc):
 
 @app.route('/oblicz', methods=['POST'])
 def oblicz():
-    """Przetwarza dane z formularza i oblicza całkowity koszt."""
     data = request.json
+    print("Otrzymane dane:", data)  # Dodajemy logowanie danych wejściowych
     fabryki = data['fabryki']
     czesci = ["aero", "skrzynia", "hamulce", "elektronika", "zawieszenie", "niezawodność"]
     
@@ -35,17 +35,18 @@ def oblicz():
         decision = data['decyzje'][czesc]
         level = int(data['poziomy'][czesc])
         ilosc = int(data['ilosci'][czesc])
+
+        # Logowanie przed obliczeniami
+        print(f"Obliczam koszt dla {czesc} z decyzją: {decision}, poziom: {level}, ilość: {ilosc}")
         
-        # Obliczamy koszt dla danej części
         koszt_calkowity = oblicz_koszt(czesc, decision, level, fabryki[czesc], ilosc)
         
-        # Sprawdzamy, czy koszt_calkowity nie jest None
-        if koszt_calkowity is not None:
-            results[czesc] = koszt_calkowity
-            total_cost += koszt_calkowity
-
-    # Zwracamy obliczone koszty w formacie JSON
+        # Logowanie wyników
+        print(f"Wynik kosztu dla {czesc}: {koszt_calkowity}")
+        
+        results[czesc] = koszt_calkowity
+        total_cost += koszt_calkowity
+    
     return jsonify({"koszty": results, "total_cost": total_cost})
-
 if __name__ == '__main__':
     app.run(debug=True)
