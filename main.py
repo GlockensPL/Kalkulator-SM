@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from koszt import koszt  # Importujemy dane z pliku koszt.py
 
 app = Flask(__name__)
+CORS(app)
 
 def oblicz_koszt(czesc, decision_value, level, fabryka, ilosc):
     """
