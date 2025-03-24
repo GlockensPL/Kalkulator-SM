@@ -55,8 +55,7 @@ def znajdz_koszt(czesc, decision, level):
     except KeyError:
         print(f"Nie znaleziono kosztu dla: {czesc}, {decision}, {level}")
         return 0  # Zwracamy 0, jeśli koszt nie został znaleziony
-        
-@app.route('/oblicz', methods=['POST'])
+
 @app.route('/oblicz', methods=['POST'])
 def oblicz():
     try:
@@ -70,22 +69,32 @@ def oblicz():
         decyzje = data['decyzje']
         wyniki = []
 
-        # Iterujemy przez decyzje i konwertujemy na float
+        # Określanie stanu (Degradacja, Utrzymanie, Rozwój)
         for czesc, value in decyzje.items():
             try:
-                # Sprawdzamy, czy wartość może być przekonwertowana na float
+                # Sprawdzamy, czy wartość decyzji jest liczbą
                 decision_value = float(value)
-                wyniki.append(f"Decyzja dla {czesc}: {decision_value}")
+
+                # Określamy stan na podstawie wartości decyzji
+                if decision_value == 0:
+                    status = "Degradacja"
+                elif decision_value == 0.5 or decision_value == 0.5:
+                    status = "Utrzymanie"
+                elif decision_value > 0.5:
+                    status = "Rozwój"
+                else:
+                    status = "Błąd: niewłaściwa wartość"
+
+                wyniki.append(f"Decyzja dla {czesc.capitalize()}: {status} (Wartość: {decision_value})")
             except ValueError:
                 # Obsługujemy przypadek, gdy wartość nie jest liczbą
-                wyniki.append(f"Decyzja dla {czesc}: Błąd konwersji (nie jest liczbą)")
-        
+                wyniki.append(f"Decyzja dla {czesc.capitalize()}: Błąd konwersji (nie jest liczbą)")
+
         # Zwracamy odpowiedź z wynikami
         return jsonify({'wyniki': wyniki}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 if __name__ == '__main__':
     app.run(debug=True)
