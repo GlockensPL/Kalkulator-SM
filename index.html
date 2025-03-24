@@ -3,101 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Decyzji</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Kalkulator kosztów</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input, select {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 200px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Kalkulator Decyzji dla Fabryk</h1>
-    <form id="decyzje-form">
-        <h2>Aerodynamika</h2>
-        <label for="aerodynamika">Decyzja dla Aerodynamiki (np. 0, 0.5, 1, ...):</label>
-        <input type="number" id="aerodynamika" name="aerodynamika" step="0.1" min="0" required><br><br>
+    <div class="container">
+        <h1>Wybierz decyzje i stan części</h1>
 
-        <h2>Skrzynia biegów</h2>
-        <label for="skrzynia">Decyzja dla Skrzyni Biegów (np. 0, 0.5, 1, ...):</label>
-        <input type="number" id="skrzynia" name="skrzynia" step="0.1" min="0" required><br><br>
+        <form id="calculator-form">
+            <div>
+                <label for="aerodynamika">Aerodynamika (Decyzja, Poziom):</label>
+                <input type="text" id="aerodynamika-decyzja" placeholder="Wpisz decyzję (np. 1, 0.5, 0)" required>
+                <input type="number" id="aerodynamika-poziom" placeholder="Poziom" required>
+            </div>
 
-        <h2>Hamulce</h2>
-        <label for="hamulce">Decyzja dla Hamulców (np. 0, 0.5, 1, ...):</label>
-        <input type="number" id="hamulce" name="hamulce" step="0.1" min="0" required><br><br>
+            <div>
+                <label for="skrzynia">Skrzynia Biegów (Decyzja, Poziom):</label>
+                <input type="text" id="skrzynia-decyzja" placeholder="Wpisz decyzję (np. 1, 0.5, 0)" required>
+                <input type="number" id="skrzynia-poziom" placeholder="Poziom" required>
+            </div>
 
-        <h2>Elektronika</h2>
-        <label for="elektronika">Decyzja dla Elektroniki (np. 0, 0.5, 1, ...):</label>
-        <input type="number" id="elektronika" name="elektronika" step="0.1" min="0" required><br><br>
+            <div>
+                <label for="hamulce">Hamulce (Decyzja, Poziom):</label>
+                <input type="text" id="hamulce-decyzja" placeholder="Wpisz decyzję (np. 1, 0.5, 0)" required>
+                <input type="number" id="hamulce-poziom" placeholder="Poziom" required>
+            </div>
 
-        <h2>Zawieszenie</h2>
-        <label for="zawieszenie">Decyzja dla Zawieszenia (np. 0, 0.5, 1, ...):</label>
-        <input type="number" id="zawieszenie" name="zawieszenie" step="0.1" min="0" required><br><br>
+            <div>
+                <label for="elektronika">Elektronika (Decyzja, Poziom):</label>
+                <input type="text" id="elektronika-decyzja" placeholder="Wpisz decyzję (np. 1, 0.5, 0)" required>
+                <input type="number" id="elektronika-poziom" placeholder="Poziom" required>
+            </div>
 
-        <h2>Niezawodność</h2>
-        <label for="niezawodnosc">Decyzja dla Niezawodności (np. 0, 0.5, 1, ...):</label>
-        <input type="number" id="niezawodnosc" name="niezawodnosc" step="0.1" min="0" required><br><br>
+            <div>
+                <label for="zawieszenie">Zawieszenie (Decyzja, Poziom):</label>
+                <input type="text" id="zawieszenie-decyzja" placeholder="Wpisz decyzję (np. 1, 0.5, 0)" required>
+                <input type="number" id="zawieszenie-poziom" placeholder="Poziom" required>
+            </div>
 
-        <button type="submit">Prześlij decyzje</button>
-    </form>
+            <div>
+                <label for="niezawodnosc">Niezawodność (Decyzja, Poziom):</label>
+                <input type="text" id="niezawodnosc-decyzja" placeholder="Wpisz decyzję (np. 1, 0.5, 0)" required>
+                <input type="number" id="niezawodnosc-poziom" placeholder="Poziom" required>
+            </div>
 
-    <!-- Sekcja wyników -->
-    <div id="response">
-        <h2>Wyniki:</h2>
-        <ul id="wyniki"></ul>
+            <h3>Stan fabryk</h3>
+
+            <div>
+                <label for="aerodynamika-fabryka">Aerodynamika (Stan fabryki):</label>
+                <input type="number" id="aerodynamika-fabryka" placeholder="Stan fabryki" required>
+            </div>
+
+            <div>
+                <label for="skrzynia-fabryka">Skrzynia Biegów (Stan fabryki):</label>
+                <input type="number" id="skrzynia-fabryka" placeholder="Stan fabryki" required>
+            </div>
+
+            <div>
+                <label for="hamulce-fabryka">Hamulce (Stan fabryki):</label>
+                <input type="number" id="hamulce-fabryka" placeholder="Stan fabryki" required>
+            </div>
+
+            <div>
+                <label for="elektronika-fabryka">Elektronika (Stan fabryki):</label>
+                <input type="number" id="elektronika-fabryka" placeholder="Stan fabryki" required>
+            </div>
+
+            <div>
+                <label for="zawieszenie-fabryka">Zawieszenie (Stan fabryki):</label>
+                <input type="number" id="zawieszenie-fabryka" placeholder="Stan fabryki" required>
+            </div>
+
+            <div>
+                <label for="niezawodnosc-fabryka">Niezawodność (Stan fabryki):</label>
+                <input type="number" id="niezawodnosc-fabryka" placeholder="Stan fabryki" required>
+            </div>
+
+            <div>
+                <button type="submit">Oblicz</button>
+            </div>
+        </form>
+
+        <div class="results">
+            <h2>Wyniki:</h2>
+            <ul id="results-list"></ul>
+        </div>
     </div>
 
     <script>
-        $(document).ready(function() {
-            // Obsługuje wysyłanie formularza
-            $('#decyzje-form').on('submit', function(e) {
-                e.preventDefault();  // Zapobiega domyślnemu zachowaniu formularza
+        document.getElementById('calculator-form').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-                // Pobranie danych z formularza
-                let decyzje = {
-                    aerodynamika: $('#aerodynamika').val(),
-                    skrzynia: $('#skrzynia').val(),
-                    hamulce: $('#hamulce').val(),
-                    elektronika: $('#elektronika').val(),
-                    zawieszenie: $('#zawieszenie').val(),
-                    niezawodnosc: $('#niezawodnosc').val()
-                };
+            // Pobieranie decyzji i stanów z formularza
+            const decyzje = {
+                aerodynamika: document.getElementById('aerodynamika-decyzja').value,
+                skrzynia: document.getElementById('skrzynia-decyzja').value,
+                hamulce: document.getElementById('hamulce-decyzja').value,
+                elektronika: document.getElementById('elektronika-decyzja').value,
+                zawieszenie: document.getElementById('zawieszenie-decyzja').value,
+                niezawodnosc: document.getElementById('niezawodnosc-decyzja').value
+            };
 
-                // Określanie stanu fabryki na podstawie wprowadzonych wartości
-                function okresl_stan(decyzja) {
-                    if (decyzja == 0) {
-                        return "Degradacja";
-                    } else if (decyzja == 0.5 || decyzja == 0.5) {
-                        return "Utrzymanie";
-                    } else if (decyzja > 0.5) {
-                        return "Rozwój";
-                    }
-                }
+            const stanCzesci = {
+                aerodynamika: document.getElementById('aerodynamika-poziom').value,
+                skrzynia: document.getElementById('skrzynia-poziom').value,
+                hamulce: document.getElementById('hamulce-poziom').value,
+                elektronika: document.getElementById('elektronika-poziom').value,
+                zawieszenie: document.getElementById('zawieszenie-poziom').value,
+                niezawodnosc: document.getElementById('niezawodnosc-poziom').value
+            };
 
-                // Mapowanie decyzji na stany fabryki
-                let stany = {
-                    aerodynamika: okresl_stan(parseFloat(decyzje.aerodynamika)),
-                    skrzynia: okresl_stan(parseFloat(decyzje.skrzynia)),
-                    hamulce: okresl_stan(parseFloat(decyzje.hamulce)),
-                    elektronika: okresl_stan(parseFloat(decyzje.elektronika)),
-                    zawieszenie: okresl_stan(parseFloat(decyzje.zawieszenie)),
-                    niezawodnosc: okresl_stan(parseFloat(decyzje.niezawodnosc))
-                };
+            const stanFabryk = {
+                aerodynamika: document.getElementById('aerodynamika-fabryka').value,
+                skrzynia: document.getElementById('skrzynia-fabryka').value,
+                hamulce: document.getElementById('hamulce-fabryka').value,
+                elektronika: document.getElementById('elektronika-fabryka').value,
+                zawieszenie: document.getElementById('zawieszenie-fabryka').value,
+                niezawodnosc: document.getElementById('niezawodnosc-fabryka').value
+            };
 
-                // Wysłanie danych do backendu
-                $.ajax({
-                    url: 'https://kalkulator-sm.onrender.com/oblicz',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ decyzje: stany }),
-                    success: function(response) {
-                        // Zamiast pustej listy, teraz wyświetlamy wyniki
-                        $('#wyniki').empty();  // Czyszczenie wyników przed wyświetleniem nowych
-                        response.wyniki.forEach(function(result) {
-                            $('#wyniki').append('<li>' + result + '</li>');
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        // Obsługuje błędy, jeśli coś pójdzie nie tak
-                        $('#wyniki').empty();  // Czyszczenie wyników
-                        $('#wyniki').append('<li>' + xhr.responseJSON.error + '</li>');  // Wyświetlanie błędu
-                    }
+            // Przygotowanie danych do wysłania
+            const data = {
+                decyzje: decyzje,
+                stan_czesci: stanCzesci,
+                stan_fabryk: stanFabryk
+            };
+
+            // Wysyłanie zapytania do backendu
+            fetch('https://kalkulator-sm.onrender.com/oblicz', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Wyświetlanie wyników
+                const resultsList = document.getElementById('results-list');
+                resultsList.innerHTML = '';
+                data.wyniki.forEach(result => {
+                    const li = document.createElement('li');
+                    li.textContent = result;
+                    resultsList.appendChild(li);
                 });
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         });
     </script>
