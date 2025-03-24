@@ -3,61 +3,57 @@ from koszt import koszt  # Importujemy dane z pliku koszt.py
 
 app = Flask(__name__)
 
-def znajdz_koszt(czesc, decision_type, level):
+def oblicz_koszt(czesc, decision_value, level, fabryka, ilosc):
     """
-    Funkcja zwraca koszt w zależności od decyzji i poziomu dla danej części.
+    Funkcja do obliczania kosztu w zależności od części, decyzji, poziomu i liczby jednostek.
+    Uwzględnia zmiany kosztów na każdym poziomie.
+
+    :param czesc: nazwa części
+    :param decision_value: decyzja (0.5 utrzymanie, 1, 2, 3... rozwój)
+    :param level: aktualny poziom części
+    :param fabryka: słownik z kosztami
+    :param ilosc: liczba jednostek
+    :return: całkowity koszt
     """
-    # Znajdź odpowiedni przedział poziomu (np. 40-49, 50-59)
-    if level < 50:
-        level_key = 40
-    elif level < 60:
-        level_key = 50
-    elif level < 70:
-        level_key = 60
-    elif level < 80:
-        level_key = 70
-    elif level < 90:
-        level_key = 80
-    else:
-        level_key = 90
+    total_cost = 0  # Zmienna do sumowania całkowitego kosztu
 
-    # Pobierz koszt w zależności od decyzji
-    koszt = koszt.get(czesc, {}).get(decision_type, {}).get(level_key)
-    
-    if koszt is None:
-        print(f"Nie znaleziono kosztu dla {czesc} ({decision_type}) na poziomie {level_key}")
-    return koszt
+    if decision_value == 0:  # Degradacja
+        # Obliczamy koszt w przypadku degradacji
+        return -znajdz_koszt(czesc, "utrzymanie", level)
+    elif decision_value == 0.5:  # Utrzymanie
+        # Obliczamy koszt dla utrzymania
+        return -znajdz_koszt(czesc, "utrzymanie", level) * ilosc
+    else:  # Rozwój
+        # Musimy obliczyć koszt po kolei, przechodząc przez każdy poziom
+        current_level = level
+        while current_level < level + ilosc:
+            # Zmieniamy koszt w zależności od poziomu
+            if current_level >= 60:
+                cost = znajdz_koszt(czesc, "rozwój", current_level)  # Używamy kosztu rozwoju dla poziomu >= 60
+            else:
+                cost = znajdz_koszt(czesc, "rozwój", current_level)  # Koszt rozwoju przed poziomem 60
+            total_cost += cost  # Sumujemy koszty dla każdego poziomu
+            current_level += 1  # Przechodzimy do następnego poziomu
 
-def oblicz_koszt(czesc, decision_value, level, fabryki, ilosc):
+    return total_cost  # Zwracamy całkowity koszt
+
+def znajdz_koszt(czesc, decision, level):
     """
-    Funkcja oblicza całkowity koszt na podstawie części, decyzji, poziomu i ilości.
+    Funkcja, która zwraca koszt na podstawie części, decyzji i poziomu.
+    Uwaga: Koszty są oparte na poziomie i decyzji (utrzymanie/rozwój).
+
+    :param czesc: nazwa części
+    :param decision: decyzja (utrzymanie/rozwój)
+    :param level: poziom części
+    :return: koszt dla danej części, decyzji i poziomu
     """
-    if decision_value == 0:
-        # Degradacja: zmiana poziomu o jeden w dół
-        level -= 10
-        if level < 40:  # Sprawdzamy, czy nie schodzimy poniżej poziomu 40
-            level = 40
-        decision_type = "utrzymanie"  # W przypadku degradacji zawsze korzystamy z utrzymania
-    elif decision_value == 0.5:
-        # Utrzymanie: nie zmieniamy poziomu
-        decision_type = "utrzymanie"
-    else:
-        # Rozwój: zmiana poziomu o jeden w górę
-        level += 10
-        if level > 90:  # Sprawdzamy, czy nie przekraczamy poziomu 90
-            level = 90
-        decision_type = "rozwój"  # W przypadku rozwoju korzystamy z rozwoju
-
-    # Pobieramy koszt na podstawie zmienionego poziomu i decyzji
-    koszt_rozwoju = znajdz_koszt(czesc, decision_type, level)
-    
-    if koszt_rozwoju is None:
-        return 0  # Zwracamy 0, jeśli nie znaleziono kosztu
-    
-    # Obliczamy całkowity koszt
-    koszt_calkowity = koszt_rozwoju * ilosc
-    return koszt_calkowity
-
+    # Sprawdzamy w słowniku, czy koszt jest dostępny
+    try:
+        return koszt[czesc][decision][level]
+    except KeyError:
+        print(f"Nie znaleziono kosztu dla: {czesc}, {decision}, {level}")
+        return 0  # Zwracamy 0, jeśli koszt nie został znaleziony
+        
 @app.route('/oblicz', methods=['POST'])
 def oblicz():
     data = request.json
