@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator kosztów</title>
+</head>
+<body>
+    <h2>Kalkulator kosztów</h2>
+    <form id="costForm">
+        <label>Poziom fabryki aerodynamicznej: <input type="number" id="aero_fab"></label><br>
+        <label>Poziom fabryki elektronicznej: <input type="number" id="elektronika_fab"></label><br>
+        <label>Poziom fabryki zawieszenia: <input type="number" id="zawieszenie_fab"></label><br>
+        <label>Poziom fabryki niezawodności: <input type="number" id="niezawodnosc_fab"></label><br>
+        <label>Poziom fabryki telemetrycznej (skrzynia + hamulce): <input type="number" id="telemetria_fab"></label><br>
+
+        <h3>Części</h3>
+        <div id="parts"></div>
+
+        <button type="submit">Oblicz</button>
+    </form>
+    
+    <h3>Wynik</h3>
+    <pre id="result"></pre>
+
+    <script>
+        const parts = ["aero", "skrzynia", "hamulce", "elektronika", "zawieszenie", "niezawodność"];
+        const partsDiv = document.getElementById("parts");
+
+        parts.forEach(part => {
+            partsDiv.innerHTML += `
+                <h4>${part}</h4>
+                <label>Decyzja: 
+                    <select id="${part}_decision">
+                        <option value="utrzymanie">Utrzymanie</option>
+                        <option value="rozwój">Rozwój</option>
+                    </select>
+                </label><br>
+                <label>Poziom: <input type="number" id="${part}_level"></label><br>
+                <label>Ilość: <input type="number" id="${part}_ilosc"></label><br>
+            `;
+        });
+
+        document.getElementById("costForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            
+            const fabryki = {
+                aero: parseInt(document.getElementById("aero_fab").value),
+                elektronika: parseInt(document.getElementById("elektronika_fab").value),
+                zawieszenie: parseInt(document.getElementById("zawieszenie_fab").value),
+                niezawodność: parseInt(document.getElementById("niezawodnosc_fab").value),
+                skrzynia: parseInt(document.getElementById("telemetria_fab").value),
+                hamulce: parseInt(document.getElementById("telemetria_fab").value),
+            };
+
+            let decyzje = {}, poziomy = {}, ilosci = {};
+            parts.forEach(part => {
+                decyzje[part] = document.getElementById(`${part}_decision`).value;
+                poziomy[part] = parseInt(document.getElementById(`${part}_level`).value);
+                ilosci[part] = parseInt(document.getElementById(`${part}_ilosc`).value);
+            });
+
+            const response = await fetch("http://127.0.0.1:5000/oblicz", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fabryki, decyzje, poziomy, ilosci })
+            });
+
+            const result = await response.json();
+            document.getElementById("result").innerText = `Łączny koszt: ${result.total_cost} $`;
+        });
+    </script>
+</body>
+</html>
