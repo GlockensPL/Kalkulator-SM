@@ -13,7 +13,7 @@ def oblicz_koszt(czesc, decision_value, level, fabryka, ilosc):
     :param czesc: nazwa części
     :param decision_value: decyzja (0.5 utrzymanie, 1, 2, 3... rozwój)
     :param level: aktualny poziom części
-    :param fabryka: słownik z kosztami
+    :param fabryka: słownik z kosztami fabryki
     :param ilosc: liczba jednostek
     :return: całkowity koszt
     """
@@ -21,19 +21,19 @@ def oblicz_koszt(czesc, decision_value, level, fabryka, ilosc):
 
     if decision_value == 0:  # Degradacja
         # Obliczamy koszt w przypadku degradacji
-        return -znajdz_koszt(czesc, "utrzymanie", level)
+        return -znajdz_koszt(czesc, "utrzymanie", level) * fabryka.get(czesc, 1)
     elif decision_value == 0.5:  # Utrzymanie
         # Obliczamy koszt dla utrzymania
-        return -znajdz_koszt(czesc, "utrzymanie", level) * ilosc
+        return -znajdz_koszt(czesc, "utrzymanie", level) * fabryka.get(czesc, 1) * ilosc
     else:  # Rozwój
         # Musimy obliczyć koszt po kolei, przechodząc przez każdy poziom
         current_level = level
         while current_level < level + ilosc:
             # Zmieniamy koszt w zależności od poziomu
             if current_level >= 60:
-                cost = znajdz_koszt(czesc, "rozwój", current_level)  # Używamy kosztu rozwoju dla poziomu >= 60
+                cost = znajdz_koszt(czesc, "rozwój", current_level) * fabryka.get(czesc, 1)  # Używamy kosztu rozwoju dla poziomu >= 60
             else:
-                cost = znajdz_koszt(czesc, "rozwój", current_level)  # Koszt rozwoju przed poziomem 60
+                cost = znajdz_koszt(czesc, "rozwój", current_level) * fabryka.get(czesc, 1)  # Koszt rozwoju przed poziomem 60
             total_cost += cost  # Sumujemy koszty dla każdego poziomu
             current_level += 1  # Przechodzimy do następnego poziomu
 
@@ -63,13 +63,15 @@ def oblicz():
         data = request.get_json()
 
         # Sprawdzamy, czy otrzymaliśmy odpowiednią strukturę danych
-        if 'decyzje' not in data:
-            return jsonify({'error': 'Brak decyzji w danych'}), 400
+        if 'decyzje' not in data or 'stan_czesci' not in data or 'stan_fabryk' not in data:
+            return jsonify({'error': 'Brak wymaganych danych (decyzje, stan części, stan fabryk)'}), 400
         
         decyzje = data['decyzje']
+        stan_czesci = data['stan_czesci']
+        stan_fabryk = data['stan_fabryk']
         wyniki = []
 
-        # Określanie stanu (Degradacja, Utrzymanie, Rozwój)
+        # Określanie stanu (Degradacja, Utrzymanie, Rozwój) i obliczanie kosztów
         for czesc, value in decyzje.items():
             try:
                 # Sprawdzamy, czy wartość decyzji jest liczbą
@@ -85,7 +87,15 @@ def oblicz():
                 else:
                     status = "Błąd: niewłaściwa wartość"
 
-                wyniki.append(f"Decyzja dla {czesc.capitalize()}: {status} (Wartość: {decision_value})")
+                # Pobieramy aktualny poziom części
+                level = stan_czesci.get(czesc, 0)  # Domyślnie poziom to 0, jeśli nie podano
+                fabryka = stan_fabryk.get(czesc, 1)  # Domyślnie fabryka ma współczynnik 1
+
+                # Oblicz koszt
+                koszt = oblicz_koszt(czesc, decision_value, level, fabryka, 1)
+
+                wyniki.append(f"Decyzja dla {czesc.capitalize()}: {status} (Wartość: {decision_value}), Koszt: {koszt}")
+
             except ValueError:
                 # Obsługujemy przypadek, gdy wartość nie jest liczbą
                 wyniki.append(f"Decyzja dla {czesc.capitalize()}: Błąd konwersji (nie jest liczbą)")
