@@ -24,13 +24,21 @@ def oblicz_koszt(czesc, decision_value, level, fabryka_lvl, ilosc):
     decision = przypisz_decyzje(decision_value)
 
     if decision == "utrzymanie":
-        return znajdz_koszt(czesc, "utrzymanie", level)
+        koszt_utrzymania = znajdz_koszt(czesc, "utrzymanie", level)
+        if koszt_utrzymania is None:
+            return 0  # Jeśli koszt nie został znaleziony, traktujemy to jako 0
+        return koszt_utrzymania
     elif decision == "rozwój":
         nowy_level = level + (ilosc * fabryka_lvl)
         koszt_rozwoju = znajdz_koszt(czesc, "rozwój", nowy_level)
+        if koszt_rozwoju is None:
+            return 0  # Jeśli koszt nie został znaleziony, traktujemy to jako 0
         return koszt_rozwoju * ilosc
     elif decision == "degradacja":
-        return -znajdz_koszt(czesc, "utrzymanie", level)  # Możesz dodać logikę dla degradacji.
+        koszt_degradacji = znajdz_koszt(czesc, "utrzymanie", level)
+        if koszt_degradacji is None:
+            return 0  # Jeśli koszt nie został znaleziony, traktujemy to jako 0
+        return -koszt_degradacji  # Zwracamy ujemny koszt dla degradacji
     return 0
 
 @app.route('/oblicz', methods=['POST'])
