@@ -4,39 +4,59 @@ from koszt import koszt  # Importujemy dane z pliku koszt.py
 app = Flask(__name__)
 
 def znajdz_koszt(czesc, decision_type, level):
-    print(f"Sprawdzam koszt dla części: {czesc}, decyzja: {decision_type}, poziom: {level}")
+    """
+    Funkcja zwraca koszt w zależności od decyzji i poziomu dla danej części.
+    """
+    # Znajdź odpowiedni przedział poziomu (np. 40-49, 50-59)
+    if level < 50:
+        level_key = 40
+    elif level < 60:
+        level_key = 50
+    elif level < 70:
+        level_key = 60
+    elif level < 80:
+        level_key = 70
+    elif level < 90:
+        level_key = 80
+    else:
+        level_key = 90
+
+    # Pobierz koszt w zależności od decyzji
+    koszt = koszt.get(czesc, {}).get(decision_type, {}).get(level_key)
     
-    if czesc not in koszt:
-        print(f"Brak danych dla części: {czesc}")
-        return None
+    if koszt is None:
+        print(f"Nie znaleziono kosztu dla {czesc} ({decision_type}) na poziomie {level_key}")
+    return koszt
 
-    if decision_type not in koszt[czesc]:
-        print(f"Brak danych dla decyzji: {decision_type} w części: {czesc}")
-        return None
-
-    for lvl, price in sorted(koszt[czesc][decision_type].items(), reverse=True):
-        # Sprawdzamy, czy level należy do przedziału
-        if level >= lvl:
-            print(f"Znaleziono koszt: {price} dla poziomu {level} (przedział {lvl}-{lvl+9})")
-            return price
-    
-    print("Nie znaleziono kosztu.")
-    return None
-
-def oblicz_koszt(czesc, decision_value, level, fabryka_lvl, ilosc):
+def oblicz_koszt(czesc, decision_value, level, fabryki, ilosc):
+    """
+    Funkcja oblicza całkowity koszt na podstawie części, decyzji, poziomu i ilości.
+    """
     if decision_value == 0:
-        print(f"Degradacja dla {czesc}")
-        return -znajdz_koszt(czesc, "utrzymanie", level)  # Degradacja
+        # Degradacja: zmiana poziomu o jeden w dół
+        level -= 10
+        if level < 40:  # Sprawdzamy, czy nie schodzimy poniżej poziomu 40
+            level = 40
+        decision_type = "utrzymanie"  # W przypadku degradacji zawsze korzystamy z utrzymania
     elif decision_value == 0.5:
-        print(f"Utrzymanie dla {czesc}")
-        return znajdz_koszt(czesc, "utrzymanie", level)  # Utrzymanie
-    elif decision_value >= 1:
-        print(f"Rozwój dla {czesc}")
-        nowy_level = level + (ilosc * fabryka_lvl)
-        koszt_rozwoju = znajdz_koszt(czesc, "rozwój", nowy_level)
-        if koszt_rozwoju is not None:
-            return koszt_rozwoju * ilosc  # Rozwój
-    return 0
+        # Utrzymanie: nie zmieniamy poziomu
+        decision_type = "utrzymanie"
+    else:
+        # Rozwój: zmiana poziomu o jeden w górę
+        level += 10
+        if level > 90:  # Sprawdzamy, czy nie przekraczamy poziomu 90
+            level = 90
+        decision_type = "rozwój"  # W przypadku rozwoju korzystamy z rozwoju
+
+    # Pobieramy koszt na podstawie zmienionego poziomu i decyzji
+    koszt_rozwoju = znajdz_koszt(czesc, decision_type, level)
+    
+    if koszt_rozwoju is None:
+        return 0  # Zwracamy 0, jeśli nie znaleziono kosztu
+    
+    # Obliczamy całkowity koszt
+    koszt_calkowity = koszt_rozwoju * ilosc
+    return koszt_calkowity
 
 @app.route('/oblicz', methods=['POST'])
 def oblicz():
