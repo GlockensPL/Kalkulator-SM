@@ -7,17 +7,36 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Wybierz decyzję (0, 0.5, 1, ...)</h1>
+    <h1>Kalkulator Decyzji dla Fabryk</h1>
     <form id="decyzje-form">
-        <label for="czesc1">Decyzja dla Części 1:</label>
-        <input type="number" id="czesc1" name="czesc1" step="0.1" min="0" required><br>
+        <h2>Aerodynamika</h2>
+        <label for="aerodynamika">Decyzja dla Aerodynamiki (np. 0, 0.5, 1, ...):</label>
+        <input type="number" id="aerodynamika" name="aerodynamika" step="0.1" min="0" required><br><br>
 
-        <label for="czesc2">Decyzja dla Części 2:</label>
-        <input type="number" id="czesc2" name="czesc2" step="0.1" min="0" required><br>
+        <h2>Skrzynia biegów</h2>
+        <label for="skrzynia">Decyzja dla Skrzyni Biegów (np. 0, 0.5, 1, ...):</label>
+        <input type="number" id="skrzynia" name="skrzynia" step="0.1" min="0" required><br><br>
+
+        <h2>Hamulce</h2>
+        <label for="hamulce">Decyzja dla Hamulców (np. 0, 0.5, 1, ...):</label>
+        <input type="number" id="hamulce" name="hamulce" step="0.1" min="0" required><br><br>
+
+        <h2>Elektronika</h2>
+        <label for="elektronika">Decyzja dla Elektroniki (np. 0, 0.5, 1, ...):</label>
+        <input type="number" id="elektronika" name="elektronika" step="0.1" min="0" required><br><br>
+
+        <h2>Zawieszenie</h2>
+        <label for="zawieszenie">Decyzja dla Zawieszenia (np. 0, 0.5, 1, ...):</label>
+        <input type="number" id="zawieszenie" name="zawieszenie" step="0.1" min="0" required><br><br>
+
+        <h2>Niezawodność</h2>
+        <label for="niezawodnosc">Decyzja dla Niezawodności (np. 0, 0.5, 1, ...):</label>
+        <input type="number" id="niezawodnosc" name="niezawodnosc" step="0.1" min="0" required><br><br>
 
         <button type="submit">Prześlij decyzje</button>
     </form>
 
+    <!-- Sekcja wyników -->
     <div id="response">
         <h2>Wyniki:</h2>
         <ul id="wyniki"></ul>
@@ -25,30 +44,58 @@
 
     <script>
         $(document).ready(function() {
+            // Obsługuje wysyłanie formularza
             $('#decyzje-form').on('submit', function(e) {
-                e.preventDefault();
+                e.preventDefault();  // Zapobiega domyślnemu zachowaniu formularza
 
                 // Pobranie danych z formularza
                 let decyzje = {
-                    czesc1: $('#czesc1').val(),
-                    czesc2: $('#czesc2').val()
+                    aerodynamika: $('#aerodynamika').val(),
+                    skrzynia: $('#skrzynia').val(),
+                    hamulce: $('#hamulce').val(),
+                    elektronika: $('#elektronika').val(),
+                    zawieszenie: $('#zawieszenie').val(),
+                    niezawodnosc: $('#niezawodnosc').val()
                 };
 
-                // Wysyłanie danych do backendu
+                // Określanie stanu fabryki na podstawie wprowadzonych wartości
+                function okresl_stan(decyzja) {
+                    if (decyzja == 0) {
+                        return "Degradacja";
+                    } else if (decyzja == 0.5 || decyzja == 0.5) {
+                        return "Utrzymanie";
+                    } else if (decyzja > 0.5) {
+                        return "Rozwój";
+                    }
+                }
+
+                // Mapowanie decyzji na stany fabryki
+                let stany = {
+                    aerodynamika: okresl_stan(parseFloat(decyzje.aerodynamika)),
+                    skrzynia: okresl_stan(parseFloat(decyzje.skrzynia)),
+                    hamulce: okresl_stan(parseFloat(decyzje.hamulce)),
+                    elektronika: okresl_stan(parseFloat(decyzje.elektronika)),
+                    zawieszenie: okresl_stan(parseFloat(decyzje.zawieszenie)),
+                    niezawodnosc: okresl_stan(parseFloat(decyzje.niezawodnosc))
+                };
+
+                // Wysłanie danych do backendu
                 $.ajax({
-                    url: 'https://kalkulator-sm.onrender.com/oblicz',  // Zaktualizuj URL, jeśli zmienisz backend
+                    url: 'https://kalkulator-sm.onrender.com/oblicz',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ decyzje: decyzje }),
+                    data: JSON.stringify({ decyzje: stany }),
                     success: function(response) {
-                        $('#wyniki').empty();
+                        // Zamiast pustej listy, teraz wyświetlamy wyniki
+                        $('#wyniki').empty();  // Czyszczenie wyników przed wyświetleniem nowych
                         response.wyniki.forEach(function(result) {
                             $('#wyniki').append('<li>' + result + '</li>');
                         });
                     },
                     error: function(xhr, status, error) {
-                        $('#wyniki').empty();
-                        $('#wyniki').append('<li>' + xhr.responseJSON.error + '</li>');
+                        // Obsługuje błędy, jeśli coś pójdzie nie tak
+                        $('#wyniki').empty();  // Czyszczenie wyników
+                        $('#wyniki').append('<li>' + xhr.responseJSON.error + '</li>');  // Wyświetlanie błędu
                     }
                 });
             });
