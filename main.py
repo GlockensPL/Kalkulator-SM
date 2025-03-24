@@ -57,26 +57,35 @@ def znajdz_koszt(czesc, decision, level):
         return 0  # Zwracamy 0, jeśli koszt nie został znaleziony
         
 @app.route('/oblicz', methods=['POST'])
+@app.route('/oblicz', methods=['POST'])
 def oblicz():
-    data = request.json
-    fabryki = data['fabryki']
-    czesci = ["aero", "skrzynia", "hamulce", "elektronika", "zawieszenie", "niezawodność"]
-    
-    total_cost = 0
-    results = {}
+    try:
+        # Odbierz dane z JSON
+        data = request.get_json()
 
-    for czesc in czesci:
-        decision_value = float(data['decyzje'][czesc])  # Teraz traktujemy decyzje jako float
-        level = int(data['poziomy'][czesc])
-        ilosc = int(data['ilosci'][czesc])
-        koszt_calkowity = oblicz_koszt(czesc, decision_value, level, fabryki[czesc], ilosc)
+        # Sprawdzamy, czy otrzymaliśmy odpowiednią strukturę danych
+        if 'decyzje' not in data:
+            return jsonify({'error': 'Brak decyzji w danych'}), 400
         
-        # Sprawdzamy, czy koszt jest None, aby uniknąć błędu typu
-        if koszt_calkowity is not None:
-            results[czesc] = koszt_calkowity
-            total_cost += koszt_calkowity
-    
-    return jsonify({"koszty": results, "total_cost": total_cost})
+        decyzje = data['decyzje']
+        wyniki = []
+
+        # Iterujemy przez decyzje i konwertujemy na float
+        for czesc, value in decyzje.items():
+            try:
+                # Sprawdzamy, czy wartość może być przekonwertowana na float
+                decision_value = float(value)
+                wyniki.append(f"Decyzja dla {czesc}: {decision_value}")
+            except ValueError:
+                # Obsługujemy przypadek, gdy wartość nie jest liczbą
+                wyniki.append(f"Decyzja dla {czesc}: Błąd konwersji (nie jest liczbą)")
+        
+        # Zwracamy odpowiedź z wynikami
+        return jsonify({'wyniki': wyniki}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
