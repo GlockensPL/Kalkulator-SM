@@ -11,12 +11,13 @@ def znajdz_koszt(czesc, decision_type, level):
     return None
 
 def oblicz_koszt(czesc, decision, level, fabryka_lvl, ilosc):
-    """Oblicza całkowity koszt na podstawie decyzji, poziomu części i fabryki."""
     if decision == "utrzymanie":
         return znajdz_koszt(czesc, "utrzymanie", level)
     elif decision == "rozwój":
         nowy_level = level + (ilosc * fabryka_lvl)
         koszt_rozwoju = znajdz_koszt(czesc, "rozwój", nowy_level)
+        if koszt_rozwoju is None:  # Jeśli koszt rozwoju jest None, zwróć 0 lub inną wartość domyślną
+            return 0  # Możesz również zwrócić np. -1, jeśli chcesz wskazać błąd
         return koszt_rozwoju * ilosc
     return 0
 
