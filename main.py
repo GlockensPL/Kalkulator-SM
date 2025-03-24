@@ -38,4 +38,4 @@ def oblicz():
     return jsonify({"koszty": results, "total_cost": total_cost})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)  # Render często używa portu 10000
+    app.run(host='0.0.0.0', port=10000)  # Użyj portu 10000 w Renderze
